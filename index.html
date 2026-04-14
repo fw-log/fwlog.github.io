@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logan McCormick | Portfolio</title>
+  <meta name="description" content="Minimalist portfolio website showcasing Logan McCormick's infrastructure, automation, and software projects." />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --text: #e8ecf1;
+      --muted: #a6b0bf;
+      --line: #2a3140;
+      --accent: #7c9cff;
+      --accent2: #4fd1c5;
+      --accent-gradient: linear-gradient(135deg, #7c9cff, #4fd1c5);
+      --max: 980px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    a:hover { opacity: 0.85; }
+
+    .wrap {
+      width: min(100% - 2rem, var(--max));
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+      background: rgba(15, 17, 21, 0.82);
+      z-index: 10;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hero {
+      padding: 5rem 0 3rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(2.25rem, 7vw, 4.5rem);
+      line-height: 1.05;
+      max-width: 12ch;
+    }
+
+    .hero p {
+      max-width: 60ch;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--accent-gradient);
+      color: #0f1115;
+      font-weight: 600;
+      min-width: 140px;
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--accent);
+    }
+
+    .btn.secondary:hover {
+      background: rgba(124, 156, 255, 0.1);
+      opacity: 1;
+    }
+
+    section {
+      padding: 2rem 0 1rem;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      max-width: 58ch;
+    }
+
+    .projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.1rem;
+      display: grid;
+      gap: 0.8rem;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px rgba(124, 156, 255, 0.15);
+      opacity: 1;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag {
+      font-size: 0.8rem;
+      color: var(--accent2);
+      border: 1px solid rgba(79, 209, 197, 0.3);
+      border-radius: 999px;
+      padding: 0.3rem 0.55rem;
+      background: rgba(79, 209, 197, 0.08);
+    }
+
+    .card-links {
+      display: flex;
+      gap: 0.9rem;
+      font-size: 0.95rem;
+    }
+
+    .about {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.1rem;
+    }
+
+    .panel p, .panel li {
+      color: var(--muted);
+    }
+
+    ul {
+      padding-left: 1.1rem;
+      margin: 0.5rem 0 0;
+    }
+
+    footer {
+      padding: 3rem 0 4rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .about { grid-template-columns: 1fr; }
+      .hero { padding-top: 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <nav>
+        <a href="#top" class="brand">LOGAN MCCORMICK</a>
+        <div class="nav-links">
+          <a href="#projects">Projects</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top" class="wrap">
+    <section class="hero">
+      <span class="eyebrow">Portfolio</span>
+      <h1>Building practical systems, automation, and infrastructure.</h1>
+      <p>
+        I create technical projects focused on reliability, automation, and clean implementation.
+        This site is a collection of the work I have been building and improving.
+      </p>
+      <div class="cta-row">
+        <a class="btn" href="#projects">View Projects</a>
+        <a class="btn secondary" href="https://github.com/fw-log" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="section-head">
+        <div>
+          <h2>Selected Projects</h2>
+          <p>Focused on infrastructure, automation, and software projects that demonstrate practical engineering and technical problem solving.</p>
+        </div>
+      </div>
+
+      <div class="projects">
+        <a href="homelab.html" class="card">
+          <h3>Home Lab Infrastructure</h3>
+          <p>Virtualized services hosted on Proxmox with containerized apps, observability tools, automation services, and network segmentation.</p>
+          <div class="tags">
+            <span class="tag">Proxmox</span>
+            <span class="tag">Docker</span>
+            <span class="tag">Networking</span>
+          </div>
+          <div class="card-links">
+            <span>View Details →</span>
+          </div>
+        </a>
+
+        <article class="card">
+          <h3>Automation Workflow</h3>
+          <p>Workflow automation for extracting assignment details, parsing due dates, and pushing events into a calendar.</p>
+          <div class="tags">
+            <span class="tag">n8n</span>
+            <span class="tag">APIs</span>
+            <span class="tag">Automation</span>
+          </div>
+          <div class="card-links">
+            <a href="https://github.com/fw-log" target="_blank" rel="noreferrer">GitHub</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Portfolio Website</h3>
+          <p>A fast static site deployed with GitHub Pages, designed to present projects in a simple and maintainable format.</p>
+          <div class="tags">
+            <span class="tag">HTML</span>
+            <span class="tag">CSS</span>
+            <span class="tag">GitHub Pages</span>
+          </div>
+          <div class="card-links">
+            <a href="https://github.com/fw-log" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="#top">Live Site</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="section-head">
+        <div>
+          <h2>About</h2>
+        </div>
+      </div>
+
+      <div class="about">
+        <div class="panel">
+          <p>
+            I am focused on building technical projects that improve my skills in software, systems, and infrastructure.
+            My work usually centers on practical engineering problems such as deployment, automation, networking, and performance.
+          </p>
+        </div>
+
+        <div class="panel">
+          <h3>Current Focus</h3>
+          <ul>
+            <li>Infrastructure and self-hosting</li>
+            <li>Automation and workflow design</li>
+            <li>Software development fundamentals</li>
+            <li>IT and systems troubleshooting</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-head">
+        <div>
+          <h2>Contact</h2>
+          <p>Find more of my work and professional background here.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="footer-links">
+          <a href="https://github.com/fw-log" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://www.linkedin.com/in/logan-mccormick-5455322bb/" target="_blank" rel="noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>© <span id="year"></span> Logan McCormick</p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
+
+

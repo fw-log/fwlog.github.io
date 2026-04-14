@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Lab Infrastructure | Logan McCormick</title>
+  <meta name="description" content="Detailed breakdown of Logan McCormick's Proxmox-based homelab, including services used and practical lessons learned." />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --text: #e8ecf1;
+      --muted: #a6b0bf;
+      --line: #2a3140;
+      --accent: #7c9cff;
+      --accent2: #4fd1c5;
+      --accent-gradient: linear-gradient(135deg, #7c9cff, #4fd1c5);
+      --max: 980px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    a:hover { opacity: 0.82; }
+
+    .wrap {
+      width: min(100% - 2rem, var(--max));
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      background: rgba(15, 17, 21, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    main {
+      padding: 4rem 0 5rem;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .eyebrow {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
+      margin-bottom: 0.9rem;
+      display: inline-block;
+    }
+
+    h1 {
+      font-size: clamp(2.1rem, 6vw, 4rem);
+      line-height: 1.05;
+      margin-bottom: 1rem;
+      max-width: 12ch;
+    }
+
+    .lead {
+      color: var(--muted);
+      max-width: 68ch;
+      font-size: 1.05rem;
+    }
+
+    .image-container {
+      margin-top: 1.5rem;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .image-container img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .back-link {
+      display: inline-flex;
+      margin-top: 1.5rem;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .back-link:hover {
+      background: rgba(124, 156, 255, 0.1);
+      opacity: 1;
+    }
+
+    section {
+      padding-top: 2.5rem;
+    }
+
+    .section-title {
+      margin-bottom: 1rem;
+    }
+
+    .section-title h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      max-width: 66ch;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.15rem;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px rgba(124, 156, 255, 0.15);
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.97rem;
+    }
+
+    .stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.15rem;
+    }
+
+    .panel p,
+    .panel li {
+      color: var(--muted);
+    }
+
+    ul {
+      margin: 0.8rem 0 0;
+      padding-left: 1.15rem;
+    }
+
+    li + li { margin-top: 0.45rem; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    footer {
+      padding: 1rem 0 4rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .two-col { grid-template-columns: 1fr; }
+      main { padding-top: 3rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <nav>
+        <a href="index.html" class="brand">LOGAN MCCORMICK</a>
+        <div class="nav-links">
+          <a href="#overview">Overview</a>
+          <a href="#services">Services</a>
+          <a href="#lessons">Lessons</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="overview">
+      <span class="eyebrow">Project Detail</span>
+      <h1>Home Lab Infrastructure</h1>
+      <p class="lead">
+        This project is a Proxmox-based home lab built to host self-managed services, test deployment workflows,
+        and improve practical skills in systems administration, networking, automation, and monitoring. It functions
+        as both a working environment and a technical learning platform.
+      </p>
+
+      <div class="image-container">
+        <img src="proxmox-dashboard.png" alt="Proxmox Dashboard Overview" />
+      </div>
+
+      <a class="back-link" href="index.html">Back to Portfolio</a>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>System Overview</h2>
+        <p>This environment runs multiple containers and services on Proxmox, with each service separated by role to improve maintainability, troubleshooting, and resource control.</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <h3>Virtualization Layer</h3>
+          <p>Proxmox is used as the primary platform for running and managing lightweight containers and services from a single host.</p>
+        </article>
+        <article class="card">
+          <h3>Service Isolation</h3>
+          <p>Applications are split across separate containers so updates, failures, and configuration changes remain isolated.</p>
+        </article>
+        <article class="card">
+          <h3>Operational Focus</h3>
+          <p>The lab is used to practice deployment, storage planning, network configuration, remote access, and performance tuning.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="services">
+      <div class="section-title">
+        <h2>Services Used in Proxmox</h2>
+        <p>These are the major services hosted in the environment and the role each one serves inside the lab.</p>
+      </div>
+      <div class="stack">
+        <div class="panel">
+          <h3>Jellyfin Media Server</h3>
+          <p>Jellyfin is used to organize and stream media from a self-hosted library. This service helped develop experience with storage mapping, permissions, remote access, and hardware transcoding.</p>
+        </div>
+
+        <div class="panel">
+          <h3>Media Automation Stack</h3>
+          <p>Radarr, Sonarr, NZBGet, and Seerr work together to automate media requests, acquisition, and organization. Building this stack required handling service communication, shared mounts, application permissions, and directory planning.</p>
+        </div>
+
+        <div class="panel">
+          <h3>n8n Automation</h3>
+          <p>n8n is used to create automation workflows for real tasks such as parsing structured information, moving data between services, and reducing repetitive manual work.</p>
+        </div>
+
+        <div class="panel">
+          <h3>Grafana and Prometheus</h3>
+          <p>Prometheus collects metrics while Grafana visualizes performance data. Together they provide visibility into CPU usage, memory usage, service behavior, and trends over time.</p>
+        </div>
+
+        <div class="panel">
+          <h3>Samba / Shared Storage</h3>
+          <p>Shared storage is exposed to selected services through managed mounts, making it possible to separate compute from storage while still giving containers controlled access to media and data directories.</p>
+        </div>
+
+        <div class="panel">
+          <h3>Reverse Proxy / Network Services</h3>
+          <p>The lab also supports experimentation with network access, internal service routing, remote connectivity, and segmentation between management and application traffic.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="lessons">
+      <div class="section-title">
+        <h2>Real-World Applications and Lessons Learned</h2>
+        <p>This project was useful because it turned abstract IT and systems concepts into repeatable hands-on work.</p>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <h3>Technical Skills Applied</h3>
+          <ul>
+            <li>Virtualization and container lifecycle management</li>
+            <li>Linux administration and service configuration</li>
+            <li>Storage design, mount points, and file permissions</li>
+            <li>Network troubleshooting and service accessibility</li>
+            <li>Monitoring, logging, and performance analysis</li>
+            <li>Incremental testing and fault isolation</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3>Professional Relevance</h3>
+          <ul>
+            <li>Mirrors real infrastructure tasks seen in IT and systems roles</li>
+            <li>Demonstrates experience with uptime, service reliability, and maintenance</li>
+            <li>Shows ability to document, debug, and improve multi-service environments</li>
+            <li>Builds familiarity with tools used in self-hosting, DevOps, and platform operations</li>
+            <li>Provides concrete examples for interviews and technical discussions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top: 1rem;">
+        <h3>What This Project Taught</h3>
+        <p>
+          The main lesson from this home lab is that infrastructure is not just about launching services. It requires planning,
+          dependency management, storage layout decisions, reliable networking, and continuous troubleshooting. Operating this
+          environment built practical confidence in diagnosing failures, tracing resource issues, organizing services by role,
+          and improving systems over time rather than treating deployment as a one-time task.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>© <span id="year"></span> Logan McCormick</p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
