@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home Lab Infrastructure | Logan McCormick</title>
-  <meta name="description" content="Detailed breakdown of Logan McCormick's Proxmox-based homelab — services, stack, and lessons learned." />
+  <title>TSnake | Logan McCormick</title>
+  <meta name="description" content="TSnake — terminal snake game with human, AI bot, and screensaver modes. Zero dependencies, pure Python." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0D0806;
@@ -23,6 +23,7 @@
       --glow-strong: rgba(255, 107, 53, 0.45);
       --max: 1000px;
       --tr: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
     }
 
     [data-theme="light"] {
@@ -61,7 +62,6 @@
       margin: 0 auto;
     }
 
-    /* === Header === */
     header {
       position: sticky;
       top: 0;
@@ -137,8 +137,8 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 70% 60% at 80% 20%, rgba(255, 107, 53, 0.14), transparent),
-        radial-gradient(ellipse 50% 50% at 20% 80%, rgba(232, 52, 10, 0.1), transparent);
+        radial-gradient(ellipse 65% 55% at 90% 10%, rgba(255, 107, 53, 0.12), transparent),
+        radial-gradient(ellipse 45% 45% at 10% 90%, rgba(232, 52, 10, 0.1), transparent);
       pointer-events: none;
     }
 
@@ -226,24 +226,76 @@
       color: #fff;
     }
 
-    /* === Image === */
-    .image-wrap {
-      margin-top: 1.5rem;
-      border-radius: 18px;
+    /* === Screenshot === */
+    .screenshot-wrap {
+      margin-top: 1.75rem;
+      border-radius: 16px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--panel);
       opacity: 0;
-      animation: fadeUp 0.6s 0.65s forwards;
+      animation: fadeUp 0.7s 0.65s forwards;
+      transition: border-color 0.22s, box-shadow 0.22s;
     }
 
-    .image-wrap img {
+    .screenshot-wrap:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 40px var(--glow);
+    }
+
+    .screenshot-wrap img {
       width: 100%;
       display: block;
       object-fit: cover;
     }
 
-    /* === Scroll Reveal === */
+    /* === Terminal block === */
+    .terminal {
+      background: #0A0604;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    [data-theme="light"] .terminal {
+      background: #1A0A00;
+    }
+
+    .terminal-bar {
+      background: var(--panel2);
+      border-bottom: 1px solid var(--border);
+      padding: 0.55rem 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-r { background: #FF5F57; }
+    .dot-y { background: #FFBD2E; }
+    .dot-g { background: #28C840; }
+
+    .terminal-body {
+      padding: 1rem 1.2rem;
+      color: #C8E0C0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .t-comment { color: #6A7860; }
+    .t-prompt { color: var(--accent); }
+    .t-flag { color: var(--accent2); }
+    .t-dim { color: #5A4838; }
+
+    /* === Scroll reveal === */
     .reveal {
       opacity: 0;
       transform: translateY(26px);
@@ -257,9 +309,8 @@
     .d3 { transition-delay: 0.3s; }
     .d4 { transition-delay: 0.4s; }
     .d5 { transition-delay: 0.5s; }
-    .d6 { transition-delay: 0.6s; }
 
-    /* === Sections === */
+    /* === Layout === */
     .divider { height: 1px; background: var(--border); }
 
     section { padding: 4.5rem 0; }
@@ -287,7 +338,6 @@
       margin-bottom: 2rem;
     }
 
-    /* === Grid === */
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
@@ -300,7 +350,6 @@
       gap: 1.1rem;
     }
 
-    /* === Cards / Panels === */
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -355,6 +404,84 @@
       line-height: 1.65;
     }
 
+    /* === AI cascade === */
+    .cascade {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .cascade-step {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1.3rem;
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      gap: 0.8rem;
+      align-items: start;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .cascade-step:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px var(--glow);
+      transform: translateX(4px);
+    }
+
+    .step-num {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent);
+      padding-top: 0.05rem;
+    }
+
+    .cascade-step h3 {
+      font-size: 0.96rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .cascade-step p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* === Snake color key === */
+    .color-key {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .color-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .color-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .color-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .color-item span { color: var(--muted); font-size: 0.82rem; }
+
+    /* === Panel === */
     .panel {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -380,89 +507,13 @@
       line-height: 1.7;
     }
 
-    /* === Service Stack === */
-    .service-stack {
-      display: grid;
-      gap: 0.9rem;
-    }
-
-    .service-item {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.3rem 1.5rem;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0 1rem;
-      align-items: start;
-      transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s;
-    }
-
-    .service-item:hover {
-      border-color: var(--accent);
-      box-shadow: 0 6px 28px var(--glow);
-      transform: translateX(4px);
-    }
-
-    .service-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-top: 0.6rem;
-      flex-shrink: 0;
-      box-shadow: 0 0 8px var(--glow);
-    }
-
-    .service-item h3 {
-      font-size: 0.98rem;
-      font-weight: 600;
-      margin-bottom: 0.3rem;
-    }
-
-    .service-item p {
-      color: var(--muted);
-      font-size: 0.91rem;
-      line-height: 1.6;
-    }
-
-    /* === Lessons list === */
-    .skill-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
-    .skill-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-      color: var(--muted);
-      font-size: 0.93rem;
-      line-height: 1.55;
-    }
-
-    .skill-list li::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-      margin-top: 0.48rem;
-    }
-
-    /* === Closing panel === */
     .closing {
       margin-top: 1rem;
       background: var(--panel);
       border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
       border-radius: 18px;
       padding: 1.6rem;
-      border-left: 3px solid var(--accent);
     }
 
     .closing h3 {
@@ -477,7 +528,6 @@
       line-height: 1.72;
     }
 
-    /* === Footer === */
     footer {
       padding: 1.75rem 0 3rem;
       border-top: 1px solid var(--border);
@@ -503,6 +553,7 @@
       .grid-2 { grid-template-columns: 1fr; }
       section { padding: 3.5rem 0; }
       .page-hero { padding: 4.5rem 0 3rem; }
+      .terminal-body { font-size: 0.78rem; }
     }
   </style>
 </head>
@@ -515,8 +566,8 @@
         <div class="nav-right">
           <div class="nav-links">
             <a href="#overview">Overview</a>
-            <a href="#services">Services</a>
-            <a href="#lessons">Lessons</a>
+            <a href="#ai">AI System</a>
+            <a href="#usage">Usage</a>
           </div>
           <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀️</button>
         </div>
@@ -528,19 +579,19 @@
     <div class="page-hero-bg"></div>
     <div class="wrap">
       <span class="eyebrow">Project Detail</span>
-      <h1>Home Lab Infrastructure</h1>
+      <h1>TSnake</h1>
       <p class="lead">
-        Proxmox-based home lab built to host self-managed services, test deployment workflows,
-        and build practical skills in systems administration, networking, automation, and monitoring.
-        Functions as both a working environment and a technical learning platform.
+        Terminal snake game with human, AI bot, and fullscreen screensaver modes.
+        Zero dependencies — pure Python stdlib. Features BFS pathfinding with tail-chase survival,
+        a three-strategy AI cascade, and a screensaver mode with 5 competing AI snakes across your full terminal.
       </p>
       <div class="hero-actions">
         <a class="btn btn-secondary" href="index.html">← Back to Portfolio</a>
-        <a class="btn btn-primary" href="#services">View Services →</a>
+        <a class="btn btn-primary" href="https://github.com/fw-log" target="_blank" rel="noreferrer">View on GitHub →</a>
       </div>
 
-      <div class="image-wrap">
-        <img src="Media/proxmox-dashboard.png" alt="Proxmox Dashboard Overview" />
+      <div class="screenshot-wrap">
+        <img src="Media/TSNAKE.png" alt="TSnake terminal screenshot" />
       </div>
     </div>
   </div>
@@ -551,26 +602,26 @@
     <section>
       <div class="wrap">
         <div class="reveal">
-          <div class="section-label">Architecture</div>
-          <h2>System Overview</h2>
-          <p class="section-desc">Multiple containers and services on Proxmox, each separated by role to improve maintainability, troubleshooting, and resource control.</p>
+          <div class="section-label">Modes</div>
+          <h2>Three Ways to Play</h2>
+          <p class="section-desc">Each mode targets a different use case — from interactive play to a fully autonomous visual demo.</p>
         </div>
 
         <div class="grid-3">
           <article class="card reveal d1">
-            <div class="card-icon">⚙️</div>
-            <h3>Virtualization Layer</h3>
-            <p>Proxmox as the primary platform for running and managing lightweight containers and services from a single host machine.</p>
+            <div class="card-icon">🎮</div>
+            <h3>Human Mode</h3>
+            <p>Classic snake controlled with arrow keys or WASD. Configurable board size (small / medium / large) and fruit count (1 / 3 / 5).</p>
           </article>
           <article class="card reveal d2">
-            <div class="card-icon">🔒</div>
-            <h3>Service Isolation</h3>
-            <p>Applications split across separate containers so updates, failures, and configuration changes remain isolated from each other.</p>
+            <div class="card-icon">🤖</div>
+            <h3>Bot Mode</h3>
+            <p>Single AI snake running the three-strategy cascade — BFS to fruit, tail-chase survival, any-safe-move fallback. Auto-restarts on death.</p>
           </article>
           <article class="card reveal d3">
-            <div class="card-icon">📈</div>
-            <h3>Operational Focus</h3>
-            <p>Lab used to practice deployment, storage planning, network config, remote access, performance tuning, and troubleshooting.</p>
+            <div class="card-icon">✨</div>
+            <h3>Screensaver Mode</h3>
+            <p>5 color-coded AI snakes competing across the full terminal with 25 fruits, head-danger lookahead for collision avoidance, and automatic respawning.</p>
           </article>
         </div>
       </div>
@@ -578,60 +629,71 @@
 
     <div class="divider"></div>
 
-    <section id="services">
+    <section id="ai">
       <div class="wrap">
         <div class="reveal">
-          <div class="section-label">Stack</div>
-          <h2>Services Running in Proxmox</h2>
-          <p class="section-desc">Major services hosted in the environment and the role each one serves inside the lab.</p>
+          <div class="section-label">Algorithm</div>
+          <h2>How the AI Works</h2>
+          <p class="section-desc">Each bot runs a three-strategy cascade every tick — falling through to the next strategy only when the current one fails.</p>
         </div>
 
-        <div class="service-stack">
-          <div class="service-item reveal d1">
-            <div class="service-dot"></div>
+        <div class="cascade">
+          <div class="cascade-step reveal d1">
+            <span class="step-num">01</span>
             <div>
-              <h3>Jellyfin Media Server</h3>
-              <p>Self-hosted media organization and streaming. Built experience with storage mapping, permissions, remote access, and hardware transcoding.</p>
+              <h3>Safe Fruit Path (BFS)</h3>
+              <p>BFS to the nearest fruit. Before committing, simulates the full path and verifies the snake can still reach its own tail — preventing self-trapping in dead ends.</p>
             </div>
           </div>
 
-          <div class="service-item reveal d2">
-            <div class="service-dot"></div>
+          <div class="cascade-step reveal d2">
+            <span class="step-num">02</span>
             <div>
-              <h3>Media Automation Stack</h3>
-              <p>Radarr, Sonarr, NZBGet, and Seerr working together to automate media requests, acquisition, and organization. Required handling service communication, shared mounts, and application permissions.</p>
+              <h3>Tail Chase</h3>
+              <p>If no safe fruit path exists, follow the tail to stay in open space. Keeps the snake moving without committing to a path that closes off future options.</p>
             </div>
           </div>
 
-          <div class="service-item reveal d3">
-            <div class="service-dot"></div>
+          <div class="cascade-step reveal d3">
+            <span class="step-num">03</span>
             <div>
-              <h3>n8n Automation</h3>
-              <p>Automation workflows for real tasks — parsing structured data, moving information between services, and reducing repetitive manual work.</p>
+              <h3>Any Safe Move</h3>
+              <p>Last resort — any direction that doesn't immediately cause death. Triggered only when both BFS and tail-chase are unavailable.</p>
             </div>
           </div>
+        </div>
 
-          <div class="service-item reveal d4">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Grafana &amp; Prometheus</h3>
-              <p>Prometheus collects metrics; Grafana visualizes performance data. Together they provide visibility into CPU, memory, service behavior, and trends over time.</p>
+        <div class="panel reveal" style="margin-top: 1rem;">
+          <h3>Screensaver: Head-Danger Avoidance</h3>
+          <p>
+            In screensaver mode each bot also computes a head-danger zone — every cell any other snake's head
+            could occupy next tick. Routes around it with soft avoidance, falling back to ignoring danger only
+            if no safe path exists. This prevents head-on collisions between competing snakes.
+          </p>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+          <div class="section-label reveal" style="margin-bottom: 0.75rem;">Screensaver Color Key</div>
+          <div class="color-key reveal">
+            <div class="color-item">
+              <div class="color-swatch" style="background:#28C840;"></div>
+              <div><div>Snake 1</div><span>Green</span></div>
             </div>
-          </div>
-
-          <div class="service-item reveal d5">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Samba / Shared Storage</h3>
-              <p>Shared storage exposed through managed mounts — separates compute from storage while giving containers controlled access to media and data directories.</p>
+            <div class="color-item">
+              <div class="color-swatch" style="background:#00BFFF;"></div>
+              <div><div>Snake 2</div><span>Cyan</span></div>
             </div>
-          </div>
-
-          <div class="service-item reveal d6">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Reverse Proxy &amp; Network Services</h3>
-              <p>Experimentation with network access, internal service routing, remote connectivity, and segmentation between management and application traffic.</p>
+            <div class="color-item">
+              <div class="color-swatch" style="background:#FFD700;"></div>
+              <div><div>Snake 3</div><span>Yellow</span></div>
+            </div>
+            <div class="color-item">
+              <div class="color-swatch" style="background:#DA70D6;"></div>
+              <div><div>Snake 4</div><span>Magenta</span></div>
+            </div>
+            <div class="color-item">
+              <div class="color-swatch" style="background:#E8E8E8;"></div>
+              <div><div>Snake 5</div><span>White</span></div>
             </div>
           </div>
         </div>
@@ -640,35 +702,65 @@
 
     <div class="divider"></div>
 
-    <section id="lessons">
+    <section id="usage">
       <div class="wrap">
         <div class="reveal">
-          <div class="section-label">Takeaways</div>
-          <h2>Real-World Applications &amp; Lessons Learned</h2>
-          <p class="section-desc">This project turned abstract IT and systems concepts into repeatable, hands-on work.</p>
+          <div class="section-label">Running It</div>
+          <h2>Usage</h2>
+          <p class="section-desc">Zero install — clone and run. Python 3.6+ and a UTF-8 terminal is all that's needed.</p>
         </div>
 
-        <div class="grid-2">
+        <div class="terminal reveal d1">
+          <div class="terminal-bar">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <div class="terminal-body"><span class="t-comment"># Clone and run</span>
+<span class="t-prompt">$</span> git clone https://github.com/fw-log/TSnake.git
+<span class="t-prompt">$</span> cd TSnake
+<span class="t-prompt">$</span> python snake.py
+
+<span class="t-comment"># Bot mode on a small board</span>
+<span class="t-prompt">$</span> python snake.py <span class="t-flag">--mode</span> bot <span class="t-flag">--size</span> small
+
+<span class="t-comment"># Large board with 5 fruits</span>
+<span class="t-prompt">$</span> python snake.py <span class="t-flag">--size</span> large <span class="t-flag">--fruits</span> 5
+
+<span class="t-comment"># Screensaver — 5 AI snakes, full terminal</span>
+<span class="t-prompt">$</span> python snake.py <span class="t-flag">--ss</span>
+
+<span class="t-comment"># Install as a system command</span>
+<span class="t-prompt">$</span> chmod +x snake.py && sudo cp snake.py /usr/local/bin/tsnake
+<span class="t-prompt">$</span> tsnake <span class="t-flag">--ss</span></div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 1.25rem;">
           <div class="panel reveal d1">
-            <h3>Technical Skills Applied</h3>
-            <ul class="skill-list">
-              <li>Virtualization and container lifecycle management</li>
-              <li>Linux administration and service configuration</li>
-              <li>Storage design, mount points, and file permissions</li>
-              <li>Network troubleshooting and service accessibility</li>
-              <li>Monitoring, logging, and performance analysis</li>
-              <li>Incremental testing and fault isolation</li>
+            <h3>Controls</h3>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+              <li style="display:flex;justify-content:space-between;font-size:0.92rem;">
+                <span style="color:var(--muted);">Move</span>
+                <code style="font-family:var(--mono);font-size:0.84rem;color:var(--accent2);">↑ ↓ ← →  or  W A S D</code>
+              </li>
+              <li style="display:flex;justify-content:space-between;font-size:0.92rem;">
+                <span style="color:var(--muted);">Restart</span>
+                <code style="font-family:var(--mono);font-size:0.84rem;color:var(--accent2);">R</code>
+              </li>
+              <li style="display:flex;justify-content:space-between;font-size:0.92rem;">
+                <span style="color:var(--muted);">Quit</span>
+                <code style="font-family:var(--mono);font-size:0.84rem;color:var(--accent2);">Q</code>
+              </li>
             </ul>
           </div>
 
           <div class="panel reveal d2">
-            <h3>Professional Relevance</h3>
-            <ul class="skill-list">
-              <li>Mirrors real infrastructure tasks in IT and systems roles</li>
-              <li>Demonstrates experience with uptime, reliability, and maintenance</li>
-              <li>Shows ability to document, debug, and improve multi-service environments</li>
-              <li>Builds familiarity with tools used in self-hosting, DevOps, and platform ops</li>
-              <li>Provides concrete examples for interviews and technical discussions</li>
+            <h3>Requirements</h3>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+              <li style="font-size:0.92rem;color:var(--muted);">Python 3.6+</li>
+              <li style="font-size:0.92rem;color:var(--muted);">Terminal with UTF-8 and color support</li>
+              <li style="font-size:0.92rem;color:var(--muted);">No third-party packages — pure stdlib</li>
+              <li style="font-size:0.92rem;color:var(--muted);">Works on Linux, macOS, most modern terminals</li>
             </ul>
           </div>
         </div>
@@ -676,10 +768,12 @@
         <div class="closing reveal">
           <h3>What This Project Taught</h3>
           <p>
-            Infrastructure is not just about launching services. It requires planning, dependency management,
-            storage layout decisions, reliable networking, and continuous troubleshooting. Operating this
-            environment built practical confidence in diagnosing failures, tracing resource issues, organizing
-            services by role, and improving systems over time rather than treating deployment as a one-time task.
+            Building TSnake meant working directly with terminal I/O, raw input handling, and
+            non-blocking keyboard reads without any libraries to abstract the complexity. The AI
+            implementation required thinking carefully about graph traversal, look-ahead simulation,
+            and multi-agent collision avoidance — problems that are small enough to be tractable but
+            deep enough to require real algorithmic thought. The result is a zero-dependency project
+            that demonstrates Python fundamentals, algorithm design, and terminal rendering from scratch.
           </p>
         </div>
       </div>

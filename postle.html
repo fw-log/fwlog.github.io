@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home Lab Infrastructure | Logan McCormick</title>
-  <meta name="description" content="Detailed breakdown of Logan McCormick's Proxmox-based homelab — services, stack, and lessons learned." />
+  <title>SocialMind / Postle | Logan McCormick</title>
+  <meta name="description" content="SocialMind — AI-powered social media content studio built on Node.js and deployed on AWS EC2." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -61,7 +61,6 @@
       margin: 0 auto;
     }
 
-    /* === Header === */
     header {
       position: sticky;
       top: 0;
@@ -137,8 +136,8 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 70% 60% at 80% 20%, rgba(255, 107, 53, 0.14), transparent),
-        radial-gradient(ellipse 50% 50% at 20% 80%, rgba(232, 52, 10, 0.1), transparent);
+        radial-gradient(ellipse 70% 60% at 85% 15%, rgba(255, 107, 53, 0.15), transparent),
+        radial-gradient(ellipse 50% 50% at 15% 85%, rgba(232, 52, 10, 0.1), transparent);
       pointer-events: none;
     }
 
@@ -226,24 +225,47 @@
       color: #fff;
     }
 
-    /* === Image === */
-    .image-wrap {
-      margin-top: 1.5rem;
-      border-radius: 18px;
+    /* === Screenshots === */
+    .screenshots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.75rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.65s forwards;
+    }
+
+    .screenshot {
+      border-radius: 16px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--panel);
-      opacity: 0;
-      animation: fadeUp 0.6s 0.65s forwards;
+      transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s;
     }
 
-    .image-wrap img {
+    .screenshot:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 32px var(--glow);
+      transform: translateY(-3px);
+    }
+
+    .screenshot img {
       width: 100%;
       display: block;
       object-fit: cover;
     }
 
-    /* === Scroll Reveal === */
+    .screenshot-label {
+      padding: 0.6rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-top: 1px solid var(--border);
+    }
+
+    /* === Scroll reveal === */
     .reveal {
       opacity: 0;
       transform: translateY(26px);
@@ -259,7 +281,7 @@
     .d5 { transition-delay: 0.5s; }
     .d6 { transition-delay: 0.6s; }
 
-    /* === Sections === */
+    /* === Layout === */
     .divider { height: 1px; background: var(--border); }
 
     section { padding: 4.5rem 0; }
@@ -287,7 +309,6 @@
       margin-bottom: 2rem;
     }
 
-    /* === Grid === */
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
@@ -300,7 +321,6 @@
       gap: 1.1rem;
     }
 
-    /* === Cards / Panels === */
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -355,6 +375,42 @@
       line-height: 1.65;
     }
 
+    /* === Stack table === */
+    .stack-grid {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .stack-row {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.3rem;
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 1rem;
+      align-items: center;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .stack-row:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px var(--glow);
+      transform: translateX(4px);
+    }
+
+    .stack-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--accent2);
+    }
+
+    .stack-desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* === Panel === */
     .panel {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -380,54 +436,7 @@
       line-height: 1.7;
     }
 
-    /* === Service Stack === */
-    .service-stack {
-      display: grid;
-      gap: 0.9rem;
-    }
-
-    .service-item {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.3rem 1.5rem;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0 1rem;
-      align-items: start;
-      transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s;
-    }
-
-    .service-item:hover {
-      border-color: var(--accent);
-      box-shadow: 0 6px 28px var(--glow);
-      transform: translateX(4px);
-    }
-
-    .service-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-top: 0.6rem;
-      flex-shrink: 0;
-      box-shadow: 0 0 8px var(--glow);
-    }
-
-    .service-item h3 {
-      font-size: 0.98rem;
-      font-weight: 600;
-      margin-bottom: 0.3rem;
-    }
-
-    .service-item p {
-      color: var(--muted);
-      font-size: 0.91rem;
-      line-height: 1.6;
-    }
-
-    /* === Lessons list === */
-    .skill-list {
+    .bullet-list {
       list-style: none;
       padding: 0;
       margin: 0;
@@ -436,7 +445,7 @@
       gap: 0.6rem;
     }
 
-    .skill-list li {
+    .bullet-list li {
       display: flex;
       align-items: flex-start;
       gap: 0.65rem;
@@ -445,7 +454,7 @@
       line-height: 1.55;
     }
 
-    .skill-list li::before {
+    .bullet-list li::before {
       content: '';
       width: 6px;
       height: 6px;
@@ -455,14 +464,13 @@
       margin-top: 0.48rem;
     }
 
-    /* === Closing panel === */
     .closing {
       margin-top: 1rem;
       background: var(--panel);
       border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
       border-radius: 18px;
       padding: 1.6rem;
-      border-left: 3px solid var(--accent);
     }
 
     .closing h3 {
@@ -477,7 +485,6 @@
       line-height: 1.72;
     }
 
-    /* === Footer === */
     footer {
       padding: 1.75rem 0 3rem;
       border-top: 1px solid var(--border);
@@ -501,6 +508,8 @@
     @media (max-width: 720px) {
       .nav-links { display: none; }
       .grid-2 { grid-template-columns: 1fr; }
+      .screenshots { grid-template-columns: 1fr; }
+      .stack-row { grid-template-columns: 1fr; gap: 0.25rem; }
       section { padding: 3.5rem 0; }
       .page-hero { padding: 4.5rem 0 3rem; }
     }
@@ -515,8 +524,8 @@
         <div class="nav-right">
           <div class="nav-links">
             <a href="#overview">Overview</a>
-            <a href="#services">Services</a>
-            <a href="#lessons">Lessons</a>
+            <a href="#stack">Stack</a>
+            <a href="#features">Features</a>
           </div>
           <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀️</button>
         </div>
@@ -528,19 +537,27 @@
     <div class="page-hero-bg"></div>
     <div class="wrap">
       <span class="eyebrow">Project Detail</span>
-      <h1>Home Lab Infrastructure</h1>
+      <h1>SocialMind — AI Content Studio</h1>
       <p class="lead">
-        Proxmox-based home lab built to host self-managed services, test deployment workflows,
-        and build practical skills in systems administration, networking, automation, and monitoring.
-        Functions as both a working environment and a technical learning platform.
+        Full-stack SaaS platform (Postle) for AI-generated social media content.
+        Node.js backend with SQLite, JWT auth, and OpenAI integration — deployed on AWS EC2
+        behind nginx with GitHub Actions CI/CD. Includes a complete dashboard UI for managing
+        and generating posts.
       </p>
       <div class="hero-actions">
         <a class="btn btn-secondary" href="index.html">← Back to Portfolio</a>
-        <a class="btn btn-primary" href="#services">View Services →</a>
+        <a class="btn btn-primary" href="https://github.com/fw-log" target="_blank" rel="noreferrer">View on GitHub →</a>
       </div>
 
-      <div class="image-wrap">
-        <img src="Media/proxmox-dashboard.png" alt="Proxmox Dashboard Overview" />
+      <div class="screenshots">
+        <div class="screenshot">
+          <img src="Media/Postle_home.png" alt="Postle landing page" />
+          <div class="screenshot-label">Landing Page</div>
+        </div>
+        <div class="screenshot">
+          <img src="Media/Postle_adminpanel.png" alt="Postle admin dashboard" />
+          <div class="screenshot-label">Admin Dashboard</div>
+        </div>
       </div>
     </div>
   </div>
@@ -552,25 +569,25 @@
       <div class="wrap">
         <div class="reveal">
           <div class="section-label">Architecture</div>
-          <h2>System Overview</h2>
-          <p class="section-desc">Multiple containers and services on Proxmox, each separated by role to improve maintainability, troubleshooting, and resource control.</p>
+          <h2>How It's Built</h2>
+          <p class="section-desc">Full-stack application from frontend to cloud deployment — every layer built and configured manually.</p>
         </div>
 
         <div class="grid-3">
           <article class="card reveal d1">
-            <div class="card-icon">⚙️</div>
-            <h3>Virtualization Layer</h3>
-            <p>Proxmox as the primary platform for running and managing lightweight containers and services from a single host machine.</p>
+            <div class="card-icon">🖥️</div>
+            <h3>Frontend</h3>
+            <p>Single-page dashboard with auth gate, content generation UI, post management, and real-time feedback — served as static files via nginx.</p>
           </article>
           <article class="card reveal d2">
-            <div class="card-icon">🔒</div>
-            <h3>Service Isolation</h3>
-            <p>Applications split across separate containers so updates, failures, and configuration changes remain isolated from each other.</p>
+            <div class="card-icon">⚙️</div>
+            <h3>Backend</h3>
+            <p>Node.js + Express REST API with JWT authentication, SQLite for persistence, and OpenAI API integration for AI content generation.</p>
           </article>
           <article class="card reveal d3">
-            <div class="card-icon">📈</div>
-            <h3>Operational Focus</h3>
-            <p>Lab used to practice deployment, storage planning, network config, remote access, performance tuning, and troubleshooting.</p>
+            <div class="card-icon">☁️</div>
+            <h3>Infrastructure</h3>
+            <p>AWS EC2 (Ubuntu, t3.small) with nginx reverse proxy, PM2 process management, Let's Encrypt TLS, and automated deploys via GitHub Actions.</p>
           </article>
         </div>
       </div>
@@ -578,61 +595,46 @@
 
     <div class="divider"></div>
 
-    <section id="services">
+    <section id="stack">
       <div class="wrap">
         <div class="reveal">
-          <div class="section-label">Stack</div>
-          <h2>Services Running in Proxmox</h2>
-          <p class="section-desc">Major services hosted in the environment and the role each one serves inside the lab.</p>
+          <div class="section-label">Tech Stack</div>
+          <h2>Technologies Used</h2>
+          <p class="section-desc">Each technology chosen for a specific role in the deployment pipeline.</p>
         </div>
 
-        <div class="service-stack">
-          <div class="service-item reveal d1">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Jellyfin Media Server</h3>
-              <p>Self-hosted media organization and streaming. Built experience with storage mapping, permissions, remote access, and hardware transcoding.</p>
-            </div>
+        <div class="stack-grid">
+          <div class="stack-row reveal d1">
+            <span class="stack-label">Node.js / Express</span>
+            <span class="stack-desc">REST API server handling auth, content requests, and data persistence</span>
           </div>
-
-          <div class="service-item reveal d2">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Media Automation Stack</h3>
-              <p>Radarr, Sonarr, NZBGet, and Seerr working together to automate media requests, acquisition, and organization. Required handling service communication, shared mounts, and application permissions.</p>
-            </div>
+          <div class="stack-row reveal d2">
+            <span class="stack-label">OpenAI API</span>
+            <span class="stack-desc">AI content generation for social media posts based on user prompts and platform targets</span>
           </div>
-
-          <div class="service-item reveal d3">
-            <div class="service-dot"></div>
-            <div>
-              <h3>n8n Automation</h3>
-              <p>Automation workflows for real tasks — parsing structured data, moving information between services, and reducing repetitive manual work.</p>
-            </div>
+          <div class="stack-row reveal d3">
+            <span class="stack-label">SQLite</span>
+            <span class="stack-desc">Lightweight embedded database for user accounts, sessions, and generated content</span>
           </div>
-
-          <div class="service-item reveal d4">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Grafana &amp; Prometheus</h3>
-              <p>Prometheus collects metrics; Grafana visualizes performance data. Together they provide visibility into CPU, memory, service behavior, and trends over time.</p>
-            </div>
+          <div class="stack-row reveal d4">
+            <span class="stack-label">JWT Auth</span>
+            <span class="stack-desc">Token-based authentication with protected routes on both frontend and API</span>
           </div>
-
-          <div class="service-item reveal d5">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Samba / Shared Storage</h3>
-              <p>Shared storage exposed through managed mounts — separates compute from storage while giving containers controlled access to media and data directories.</p>
-            </div>
+          <div class="stack-row reveal d5">
+            <span class="stack-label">AWS EC2</span>
+            <span class="stack-desc">Ubuntu 22.04 instance running the full stack — t3.small for cost-effective hosting</span>
           </div>
-
-          <div class="service-item reveal d6">
-            <div class="service-dot"></div>
-            <div>
-              <h3>Reverse Proxy &amp; Network Services</h3>
-              <p>Experimentation with network access, internal service routing, remote connectivity, and segmentation between management and application traffic.</p>
-            </div>
+          <div class="stack-row reveal d6">
+            <span class="stack-label">nginx</span>
+            <span class="stack-desc">Reverse proxy routing traffic to Node port 3000, serving static frontend, and handling HTTPS termination</span>
+          </div>
+          <div class="stack-row reveal d1">
+            <span class="stack-label">PM2</span>
+            <span class="stack-desc">Process manager keeping Node server alive across reboots with ecosystem config</span>
+          </div>
+          <div class="stack-row reveal d2">
+            <span class="stack-label">GitHub Actions</span>
+            <span class="stack-desc">CI/CD pipeline — auto-deploys to EC2 via SSH on push to main branch</span>
           </div>
         </div>
       </div>
@@ -640,35 +642,34 @@
 
     <div class="divider"></div>
 
-    <section id="lessons">
+    <section id="features">
       <div class="wrap">
         <div class="reveal">
-          <div class="section-label">Takeaways</div>
-          <h2>Real-World Applications &amp; Lessons Learned</h2>
-          <p class="section-desc">This project turned abstract IT and systems concepts into repeatable, hands-on work.</p>
+          <div class="section-label">Capabilities</div>
+          <h2>Features &amp; What Was Built</h2>
+          <p class="section-desc">End-to-end product covering content generation, auth, and deployment.</p>
         </div>
 
         <div class="grid-2">
           <div class="panel reveal d1">
-            <h3>Technical Skills Applied</h3>
-            <ul class="skill-list">
-              <li>Virtualization and container lifecycle management</li>
-              <li>Linux administration and service configuration</li>
-              <li>Storage design, mount points, and file permissions</li>
-              <li>Network troubleshooting and service accessibility</li>
-              <li>Monitoring, logging, and performance analysis</li>
-              <li>Incremental testing and fault isolation</li>
+            <h3>Application Features</h3>
+            <ul class="bullet-list">
+              <li>AI-powered post generation targeting specific platforms and tones</li>
+              <li>User authentication with JWT — protected dashboard and API routes</li>
+              <li>Post history and management in the admin panel</li>
+              <li>Responsive single-page UI with real-time generation feedback</li>
+              <li>Admin panel for monitoring usage and managing content</li>
             </ul>
           </div>
 
           <div class="panel reveal d2">
-            <h3>Professional Relevance</h3>
-            <ul class="skill-list">
-              <li>Mirrors real infrastructure tasks in IT and systems roles</li>
-              <li>Demonstrates experience with uptime, reliability, and maintenance</li>
-              <li>Shows ability to document, debug, and improve multi-service environments</li>
-              <li>Builds familiarity with tools used in self-hosting, DevOps, and platform ops</li>
-              <li>Provides concrete examples for interviews and technical discussions</li>
+            <h3>Infrastructure Work</h3>
+            <ul class="bullet-list">
+              <li>EC2 instance provisioned and bootstrapped from scratch with shell script</li>
+              <li>nginx configured as reverse proxy with HTTPS via Let's Encrypt / certbot</li>
+              <li>PM2 ecosystem config for process management and auto-restart</li>
+              <li>GitHub Actions workflow for zero-downtime deploys over SSH</li>
+              <li>Security group rules scoped to required ports only</li>
             </ul>
           </div>
         </div>
@@ -676,10 +677,11 @@
         <div class="closing reveal">
           <h3>What This Project Taught</h3>
           <p>
-            Infrastructure is not just about launching services. It requires planning, dependency management,
-            storage layout decisions, reliable networking, and continuous troubleshooting. Operating this
-            environment built practical confidence in diagnosing failures, tracing resource issues, organizing
-            services by role, and improving systems over time rather than treating deployment as a one-time task.
+            Building Postle end-to-end meant owning every layer — API design, auth flows, AI integration,
+            database schema, cloud provisioning, and deployment automation. The infrastructure side was
+            particularly valuable: configuring nginx, setting up TLS, managing processes with PM2, and
+            wiring up CI/CD gave hands-on experience with the full production deployment lifecycle that
+            goes beyond just writing application code.
           </p>
         </div>
       </div>
