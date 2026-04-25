@@ -1,52 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home Lab Infrastructure | Logan McCormick</title>
-  <meta name="description" content="Detailed breakdown of Logan McCormick's Proxmox-based homelab, including services used and practical lessons learned." />
+  <meta name="description" content="Detailed breakdown of Logan McCormick's Proxmox-based homelab — services, stack, and lessons learned." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1115;
-      --panel: #161a22;
-      --text: #e8ecf1;
-      --muted: #a6b0bf;
-      --line: #2a3140;
-      --accent: #7c9cff;
-      --accent2: #4fd1c5;
-      --accent-gradient: linear-gradient(135deg, #7c9cff, #4fd1c5);
-      --max: 980px;
+      --bg: #0D0806;
+      --bg2: #120B07;
+      --panel: #1C120E;
+      --panel2: #241810;
+      --border: #3D2218;
+      --text: #F5E6DC;
+      --muted: #A67860;
+      --accent: #FF6B35;
+      --accent2: #FFB347;
+      --accent-gradient: linear-gradient(135deg, #FF4500, #FF8C00);
+      --glow: rgba(255, 107, 53, 0.25);
+      --glow-strong: rgba(255, 107, 53, 0.45);
+      --max: 1000px;
+      --tr: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    * { box-sizing: border-box; }
+    [data-theme="light"] {
+      --bg: #FFF5ED;
+      --bg2: #FFF0E5;
+      --panel: #FFE8D6;
+      --panel2: #FFDEC8;
+      --border: #FFB899;
+      --text: #2D1200;
+      --muted: #7A4030;
+      --accent: #C93A00;
+      --accent2: #D06000;
+      --accent-gradient: linear-gradient(135deg, #C93A00, #D06000);
+      --glow: rgba(201, 58, 0, 0.15);
+      --glow-strong: rgba(201, 58, 0, 0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+    h1, h2, h3, p { margin: 0; }
+
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.65;
+      transition: background var(--tr), color var(--tr);
+      overflow-x: hidden;
     }
 
-    a {
-      color: var(--text);
-      text-decoration: none;
-    }
-
-    a:hover { opacity: 0.82; }
+    a { color: var(--text); text-decoration: none; }
 
     .wrap {
-      width: min(100% - 2rem, var(--max));
+      width: min(100% - 2.5rem, var(--max));
       margin: 0 auto;
     }
 
+    /* === Header === */
     header {
-      border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
-      background: rgba(15, 17, 21, 0.88);
-      backdrop-filter: blur(10px);
-      z-index: 10;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13, 8, 6, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: background var(--tr), border-color var(--tr);
+    }
+
+    [data-theme="light"] header {
+      background: rgba(255, 245, 237, 0.92);
     }
 
     nav {
@@ -58,301 +86,635 @@
 
     .brand {
       font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1rem;
-      color: var(--muted);
       font-size: 0.95rem;
+      letter-spacing: 0.1em;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    main {
-      padding: 4rem 0 5rem;
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+
+    .nav-links { display: flex; gap: 1.5rem; font-size: 0.9rem; }
+
+    .nav-links a {
+      color: var(--muted);
+      transition: color 0.2s;
     }
 
-    h1, h2, h3, p { margin: 0; }
+    .nav-links a:hover { color: var(--accent); }
+
+    .theme-toggle {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 14px var(--glow);
+    }
+
+    /* === Hero === */
+    .page-hero {
+      position: relative;
+      padding: 5.5rem 0 3.5rem;
+      overflow: hidden;
+    }
+
+    .page-hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 80% 20%, rgba(255, 107, 53, 0.14), transparent),
+        radial-gradient(ellipse 50% 50% at 20% 80%, rgba(232, 52, 10, 0.1), transparent);
+      pointer-events: none;
+    }
+
+    .page-hero > .wrap { position: relative; z-index: 1; }
 
     .eyebrow {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 0.75rem;
-      margin-bottom: 0.9rem;
       display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      margin-bottom: 0.8rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.1s forwards;
     }
 
     h1 {
-      font-size: clamp(2.1rem, 6vw, 4rem);
-      line-height: 1.05;
-      margin-bottom: 1rem;
-      max-width: 12ch;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      line-height: 1.08;
+      font-weight: 700;
+      margin-bottom: 1.1rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.25s forwards;
     }
 
     .lead {
       color: var(--muted);
-      max-width: 68ch;
+      max-width: 64ch;
       font-size: 1.05rem;
+      line-height: 1.72;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.4s forwards;
     }
 
-    .image-container {
+    .hero-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.75rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.55s forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.7rem 1.3rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.22s;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 14px var(--glow);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--glow-strong);
+      color: #fff;
+    }
+
+    /* === Image === */
+    .image-wrap {
       margin-top: 1.5rem;
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
-      border: 1px solid var(--line);
+      border: 1px solid var(--border);
       background: var(--panel);
+      opacity: 0;
+      animation: fadeUp 0.6s 0.65s forwards;
     }
 
-    .image-container img {
+    .image-wrap img {
       width: 100%;
       display: block;
       object-fit: cover;
     }
 
-    .back-link {
-      display: inline-flex;
-      margin-top: 1.5rem;
-      padding: 0.8rem 1rem;
-      border: 1px solid var(--accent);
-      border-radius: 999px;
-      background: transparent;
+    /* === Scroll Reveal === */
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
     }
 
-    .back-link:hover {
-      background: rgba(124, 156, 255, 0.1);
-      opacity: 1;
-    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    section {
-      padding-top: 2.5rem;
-    }
+    .d1 { transition-delay: 0.1s; }
+    .d2 { transition-delay: 0.2s; }
+    .d3 { transition-delay: 0.3s; }
+    .d4 { transition-delay: 0.4s; }
+    .d5 { transition-delay: 0.5s; }
+    .d6 { transition-delay: 0.6s; }
 
-    .section-title {
-      margin-bottom: 1rem;
-    }
+    /* === Sections === */
+    .divider { height: 1px; background: var(--border); }
 
-    .section-title h2 {
-      font-size: 1.4rem;
+    section { padding: 4.5rem 0; }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
       margin-bottom: 0.4rem;
     }
 
-    .section-title p {
+    h2 {
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-desc {
       color: var(--muted);
-      max-width: 66ch;
+      max-width: 60ch;
+      font-size: 0.97rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
     }
 
-    .grid {
+    /* === Grid === */
+    .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.1rem;
     }
 
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.1rem;
+    }
+
+    /* === Cards / Panels === */
     .card {
       background: var(--panel);
-      border: 1px solid var(--line);
+      border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 1.15rem;
-      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      padding: 1.4rem;
+      transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-radius: inherit;
+      pointer-events: none;
     }
 
     .card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-4px);
       border-color: var(--accent);
-      box-shadow: 0 10px 30px rgba(124, 156, 255, 0.15);
+      box-shadow: 0 10px 36px var(--glow);
+    }
+
+    .card:hover::after { opacity: 1; }
+
+    .card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.18), rgba(232, 52, 10, 0.1));
+      border: 1px solid rgba(255, 107, 53, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      margin-bottom: 0.85rem;
     }
 
     .card h3 {
-      font-size: 1.05rem;
+      font-size: 1rem;
+      font-weight: 600;
       margin-bottom: 0.5rem;
     }
 
     .card p {
       color: var(--muted);
-      font-size: 0.97rem;
-    }
-
-    .stack {
-      display: grid;
-      gap: 1rem;
+      font-size: 0.93rem;
+      line-height: 1.65;
     }
 
     .panel {
       background: var(--panel);
-      border: 1px solid var(--line);
+      border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 1.15rem;
+      padding: 1.5rem;
+      transition: border-color 0.22s, box-shadow 0.22s;
     }
 
-    .panel p,
-    .panel li {
+    .panel:hover {
+      border-color: rgba(255, 107, 53, 0.4);
+      box-shadow: 0 5px 24px var(--glow);
+    }
+
+    .panel h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.65rem;
+    }
+
+    .panel p {
       color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.7;
     }
 
-    ul {
-      margin: 0.8rem 0 0;
-      padding-left: 1.15rem;
-    }
-
-    li + li { margin-top: 0.45rem; }
-
-    .two-col {
+    /* === Service Stack === */
+    .service-stack {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.9rem;
     }
 
-    footer {
-      padding: 1rem 0 4rem;
+    .service-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.3rem 1.5rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 1rem;
+      align-items: start;
+      transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s;
+    }
+
+    .service-item:hover {
+      border-color: var(--accent);
+      box-shadow: 0 6px 28px var(--glow);
+      transform: translateX(4px);
+    }
+
+    .service-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 0.6rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px var(--glow);
+    }
+
+    .service-item h3 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .service-item p {
       color: var(--muted);
+      font-size: 0.91rem;
+      line-height: 1.6;
     }
 
-    @media (max-width: 760px) {
+    /* === Lessons list === */
+    .skill-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .skill-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.55;
+    }
+
+    .skill-list li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 0.48rem;
+    }
+
+    /* === Closing panel === */
+    .closing {
+      margin-top: 1rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.6rem;
+      border-left: 3px solid var(--accent);
+    }
+
+    .closing h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .closing p {
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.72;
+    }
+
+    /* === Footer === */
+    footer {
+      padding: 1.75rem 0 3rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    @media (max-width: 720px) {
       .nav-links { display: none; }
-      .two-col { grid-template-columns: 1fr; }
-      main { padding-top: 3rem; }
+      .grid-2 { grid-template-columns: 1fr; }
+      section { padding: 3.5rem 0; }
+      .page-hero { padding: 4.5rem 0 3rem; }
     }
   </style>
 </head>
 <body>
+
   <header>
     <div class="wrap">
       <nav>
-        <a href="index.html" class="brand">LOGAN MCCORMICK</a>
-        <div class="nav-links">
-          <a href="#overview">Overview</a>
-          <a href="#services">Services</a>
-          <a href="#lessons">Lessons</a>
+        <a href="index.html" class="brand">LOGAN McCORMICK</a>
+        <div class="nav-right">
+          <div class="nav-links">
+            <a href="#overview">Overview</a>
+            <a href="#services">Services</a>
+            <a href="#lessons">Lessons</a>
+          </div>
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀️</button>
         </div>
       </nav>
     </div>
   </header>
 
-  <main class="wrap">
-    <section id="overview">
+  <div class="page-hero" id="overview">
+    <div class="page-hero-bg"></div>
+    <div class="wrap">
       <span class="eyebrow">Project Detail</span>
       <h1>Home Lab Infrastructure</h1>
       <p class="lead">
-        This project is a Proxmox-based home lab built to host self-managed services, test deployment workflows,
-        and improve practical skills in systems administration, networking, automation, and monitoring. It functions
-        as both a working environment and a technical learning platform.
+        Proxmox-based home lab built to host self-managed services, test deployment workflows,
+        and build practical skills in systems administration, networking, automation, and monitoring.
+        Functions as both a working environment and a technical learning platform.
       </p>
+      <div class="hero-actions">
+        <a class="btn btn-secondary" href="index.html">← Back to Portfolio</a>
+        <a class="btn btn-primary" href="#services">View Services →</a>
+      </div>
 
-      <div class="image-container">
+      <div class="image-wrap">
         <img src="proxmox-dashboard.png" alt="Proxmox Dashboard Overview" />
       </div>
+    </div>
+  </div>
 
-      <a class="back-link" href="index.html">Back to Portfolio</a>
-    </section>
+  <div class="divider"></div>
 
+  <main>
     <section>
-      <div class="section-title">
-        <h2>System Overview</h2>
-        <p>This environment runs multiple containers and services on Proxmox, with each service separated by role to improve maintainability, troubleshooting, and resource control.</p>
-      </div>
-      <div class="grid">
-        <article class="card">
-          <h3>Virtualization Layer</h3>
-          <p>Proxmox is used as the primary platform for running and managing lightweight containers and services from a single host.</p>
-        </article>
-        <article class="card">
-          <h3>Service Isolation</h3>
-          <p>Applications are split across separate containers so updates, failures, and configuration changes remain isolated.</p>
-        </article>
-        <article class="card">
-          <h3>Operational Focus</h3>
-          <p>The lab is used to practice deployment, storage planning, network configuration, remote access, and performance tuning.</p>
-        </article>
+      <div class="wrap">
+        <div class="reveal">
+          <div class="section-label">Architecture</div>
+          <h2>System Overview</h2>
+          <p class="section-desc">Multiple containers and services on Proxmox, each separated by role to improve maintainability, troubleshooting, and resource control.</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="card reveal d1">
+            <div class="card-icon">⚙️</div>
+            <h3>Virtualization Layer</h3>
+            <p>Proxmox as the primary platform for running and managing lightweight containers and services from a single host machine.</p>
+          </article>
+          <article class="card reveal d2">
+            <div class="card-icon">🔒</div>
+            <h3>Service Isolation</h3>
+            <p>Applications split across separate containers so updates, failures, and configuration changes remain isolated from each other.</p>
+          </article>
+          <article class="card reveal d3">
+            <div class="card-icon">📈</div>
+            <h3>Operational Focus</h3>
+            <p>Lab used to practice deployment, storage planning, network config, remote access, performance tuning, and troubleshooting.</p>
+          </article>
+        </div>
       </div>
     </section>
+
+    <div class="divider"></div>
 
     <section id="services">
-      <div class="section-title">
-        <h2>Services Used in Proxmox</h2>
-        <p>These are the major services hosted in the environment and the role each one serves inside the lab.</p>
-      </div>
-      <div class="stack">
-        <div class="panel">
-          <h3>Jellyfin Media Server</h3>
-          <p>Jellyfin is used to organize and stream media from a self-hosted library. This service helped develop experience with storage mapping, permissions, remote access, and hardware transcoding.</p>
+      <div class="wrap">
+        <div class="reveal">
+          <div class="section-label">Stack</div>
+          <h2>Services Running in Proxmox</h2>
+          <p class="section-desc">Major services hosted in the environment and the role each one serves inside the lab.</p>
         </div>
 
-        <div class="panel">
-          <h3>Media Automation Stack</h3>
-          <p>Radarr, Sonarr, NZBGet, and Seerr work together to automate media requests, acquisition, and organization. Building this stack required handling service communication, shared mounts, application permissions, and directory planning.</p>
-        </div>
+        <div class="service-stack">
+          <div class="service-item reveal d1">
+            <div class="service-dot"></div>
+            <div>
+              <h3>Jellyfin Media Server</h3>
+              <p>Self-hosted media organization and streaming. Built experience with storage mapping, permissions, remote access, and hardware transcoding.</p>
+            </div>
+          </div>
 
-        <div class="panel">
-          <h3>n8n Automation</h3>
-          <p>n8n is used to create automation workflows for real tasks such as parsing structured information, moving data between services, and reducing repetitive manual work.</p>
-        </div>
+          <div class="service-item reveal d2">
+            <div class="service-dot"></div>
+            <div>
+              <h3>Media Automation Stack</h3>
+              <p>Radarr, Sonarr, NZBGet, and Seerr working together to automate media requests, acquisition, and organization. Required handling service communication, shared mounts, and application permissions.</p>
+            </div>
+          </div>
 
-        <div class="panel">
-          <h3>Grafana and Prometheus</h3>
-          <p>Prometheus collects metrics while Grafana visualizes performance data. Together they provide visibility into CPU usage, memory usage, service behavior, and trends over time.</p>
-        </div>
+          <div class="service-item reveal d3">
+            <div class="service-dot"></div>
+            <div>
+              <h3>n8n Automation</h3>
+              <p>Automation workflows for real tasks — parsing structured data, moving information between services, and reducing repetitive manual work.</p>
+            </div>
+          </div>
 
-        <div class="panel">
-          <h3>Samba / Shared Storage</h3>
-          <p>Shared storage is exposed to selected services through managed mounts, making it possible to separate compute from storage while still giving containers controlled access to media and data directories.</p>
-        </div>
+          <div class="service-item reveal d4">
+            <div class="service-dot"></div>
+            <div>
+              <h3>Grafana &amp; Prometheus</h3>
+              <p>Prometheus collects metrics; Grafana visualizes performance data. Together they provide visibility into CPU, memory, service behavior, and trends over time.</p>
+            </div>
+          </div>
 
-        <div class="panel">
-          <h3>Reverse Proxy / Network Services</h3>
-          <p>The lab also supports experimentation with network access, internal service routing, remote connectivity, and segmentation between management and application traffic.</p>
+          <div class="service-item reveal d5">
+            <div class="service-dot"></div>
+            <div>
+              <h3>Samba / Shared Storage</h3>
+              <p>Shared storage exposed through managed mounts — separates compute from storage while giving containers controlled access to media and data directories.</p>
+            </div>
+          </div>
+
+          <div class="service-item reveal d6">
+            <div class="service-dot"></div>
+            <div>
+              <h3>Reverse Proxy &amp; Network Services</h3>
+              <p>Experimentation with network access, internal service routing, remote connectivity, and segmentation between management and application traffic.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
+    <div class="divider"></div>
+
     <section id="lessons">
-      <div class="section-title">
-        <h2>Real-World Applications and Lessons Learned</h2>
-        <p>This project was useful because it turned abstract IT and systems concepts into repeatable hands-on work.</p>
-      </div>
-
-      <div class="two-col">
-        <div class="panel">
-          <h3>Technical Skills Applied</h3>
-          <ul>
-            <li>Virtualization and container lifecycle management</li>
-            <li>Linux administration and service configuration</li>
-            <li>Storage design, mount points, and file permissions</li>
-            <li>Network troubleshooting and service accessibility</li>
-            <li>Monitoring, logging, and performance analysis</li>
-            <li>Incremental testing and fault isolation</li>
-          </ul>
+      <div class="wrap">
+        <div class="reveal">
+          <div class="section-label">Takeaways</div>
+          <h2>Real-World Applications &amp; Lessons Learned</h2>
+          <p class="section-desc">This project turned abstract IT and systems concepts into repeatable, hands-on work.</p>
         </div>
 
-        <div class="panel">
-          <h3>Professional Relevance</h3>
-          <ul>
-            <li>Mirrors real infrastructure tasks seen in IT and systems roles</li>
-            <li>Demonstrates experience with uptime, service reliability, and maintenance</li>
-            <li>Shows ability to document, debug, and improve multi-service environments</li>
-            <li>Builds familiarity with tools used in self-hosting, DevOps, and platform operations</li>
-            <li>Provides concrete examples for interviews and technical discussions</li>
-          </ul>
-        </div>
-      </div>
+        <div class="grid-2">
+          <div class="panel reveal d1">
+            <h3>Technical Skills Applied</h3>
+            <ul class="skill-list">
+              <li>Virtualization and container lifecycle management</li>
+              <li>Linux administration and service configuration</li>
+              <li>Storage design, mount points, and file permissions</li>
+              <li>Network troubleshooting and service accessibility</li>
+              <li>Monitoring, logging, and performance analysis</li>
+              <li>Incremental testing and fault isolation</li>
+            </ul>
+          </div>
 
-      <div class="panel" style="margin-top: 1rem;">
-        <h3>What This Project Taught</h3>
-        <p>
-          The main lesson from this home lab is that infrastructure is not just about launching services. It requires planning,
-          dependency management, storage layout decisions, reliable networking, and continuous troubleshooting. Operating this
-          environment built practical confidence in diagnosing failures, tracing resource issues, organizing services by role,
-          and improving systems over time rather than treating deployment as a one-time task.
-        </p>
+          <div class="panel reveal d2">
+            <h3>Professional Relevance</h3>
+            <ul class="skill-list">
+              <li>Mirrors real infrastructure tasks in IT and systems roles</li>
+              <li>Demonstrates experience with uptime, reliability, and maintenance</li>
+              <li>Shows ability to document, debug, and improve multi-service environments</li>
+              <li>Builds familiarity with tools used in self-hosting, DevOps, and platform ops</li>
+              <li>Provides concrete examples for interviews and technical discussions</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="closing reveal">
+          <h3>What This Project Taught</h3>
+          <p>
+            Infrastructure is not just about launching services. It requires planning, dependency management,
+            storage layout decisions, reliable networking, and continuous troubleshooting. Operating this
+            environment built practical confidence in diagnosing failures, tracing resource issues, organizing
+            services by role, and improving systems over time rather than treating deployment as a one-time task.
+          </p>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="wrap">
-    <p>© <span id="year"></span> Logan McCormick</p>
+  <footer>
+    <div class="wrap">
+      <div class="footer-inner">
+        <span>© <span id="year"></span> Logan McCormick</span>
+        <a href="index.html" style="color:var(--accent);">← Back to Portfolio</a>
+      </div>
+    </div>
   </footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    const toggle = document.getElementById('themeToggle');
+    let theme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+
+    toggle.addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+      toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('theme', theme);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
   </script>
 </body>
 </html>
